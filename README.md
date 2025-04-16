@@ -1,0 +1,2 @@
+# ELPricesAnalysis
+Python proje
