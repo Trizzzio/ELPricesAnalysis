@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
-import datetime as datetime
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+import matplotlib.pyplot as plt
 
 #Cleaning price and production data DK
 df_price=pd.read_csv("data/GUI_ENERGY_PRICES_DK.csv")
@@ -55,5 +58,46 @@ print(df_price_clean.head())
 df_merged=df_price_clean.join(df_production_wide,how="inner")
 
 print(df_merged.head())
+
+####ARIMA
+
+#check for stationarity
+
+result = adfuller(df_merged["price"])
+print(f"ADF STatistic: {result[0]}")
+print(f"p-value: {result[1]}")
+
+#Plot ACF and PACF to shooce p and q
+fig, ax=plt.subplots(2,1,figsize=(12,6))
+plot_acf(df_merged["price"],ax=ax[0],lags=40)
+plot_pacf(df_merged["price"],ax=ax[1],lags=40)
+plt.tight_layout()
+plt.show()
+
+#Fit ARIMA
+model = ARIMA(df_merged["price"],order=(2,1,2))
+model_fit = model.fit()
+print(model_fit.summary())
+
+#Forecast
+n_steps=30
+forecast=model_fit.get_forecast(steps=n_steps)
+mean_forecast=forecast.predicted_mean
+conf_int=forecast.conf_int()
+
+forecast_index = pd.date_range(start=df_merged.index[-1]+pd.Timedelta(days=1),periods=n_steps,freq=("D"))
+
+#Plot
+plt.figure(figsize=(12,6))
+plt.plot(df_merged["price"], label="Historical")
+plt.plot(forecast_index, mean_forecast, label="Forecast", color="green")
+plt.fill_between(forecast_index, conf_int.iloc[:,0],conf_int.iloc[:,1], color="green", alpha=0.3)
+plt.title("ARIMA Forecast")
+plt.legend()
+plt.show()
+
+
+
+
 
 
