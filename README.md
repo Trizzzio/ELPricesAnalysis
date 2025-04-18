@@ -1,2 +1,3 @@
 # ELPricesAnalysis
-Python project
+
+Analyzing electricity price data
