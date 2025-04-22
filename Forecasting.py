@@ -56,8 +56,8 @@ print(df_production_wide.head())
 print(df_price_clean.head())
 
 df_merged=df_price_clean.join(df_production_wide,how="inner")
-
 print(df_merged.head())
+df_merged.to_csv("merged_prices_production.csv")
 
 ####ARIMA
 
@@ -95,6 +95,7 @@ plt.fill_between(forecast_index, conf_int.iloc[:,0],conf_int.iloc[:,1], color="g
 plt.title("ARIMA Forecast")
 plt.legend()
 plt.show()
+
 
 
 
